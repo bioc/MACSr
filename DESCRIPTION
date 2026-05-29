@@ -31,3 +31,4 @@ PythonRequirements: Python (>= 3.9.0), macs3
 VignetteBuilder: knitr
 biocViews: Software, ChIPSeq, ATACSeq, ImmunoOncology
 StagedInstall: no
+Config/Bioconductor/UnsupportedPlatforms: windows
