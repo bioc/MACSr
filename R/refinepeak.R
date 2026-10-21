@@ -26,6 +26,8 @@
 #'     time to read alignment files). Minimum memory requested for
 #'     reading an alignment file is about # of CHROMOSOME *
 #'     BUFFER_SIZE * 8 Bytes. DEFAULT: 100000
+#' @param threads Number of CPU threads MACS3 can use, including the
+#'     main process. Use 1 for serial execution. Default: 1
 #' @param verbose Set verbose level. 0: only show critical message, 1:
 #'     show additional warning message, 2: show process information,
 #'     3: show debug messages. If you want to know where are the
@@ -50,7 +52,7 @@ refinepeak <- function(bedfile, ifile,
                        format = c("AUTO","BAM","SAM","BED","ELAND",
                                   "ELANDMULTI","ELANDEXPORT","BOWTIE"),
                        cutoff = 5, windowsize = 200L,
-                       buffer_size = 100000L, verbose = 2L,
+                       buffer_size = 100000L, threads = 1L, verbose = 2L,
                        outdir = "./", outputfile = character(), 
                        oprefix = character(), log =TRUE){
     format <- match.arg(format)
@@ -66,6 +68,7 @@ refinepeak <- function(bedfile, ifile,
                                        cutoff = cutoff,
                                        windowsize = windowsize,
                                        buffer_size = buffer_size,
+                                       threads = as.integer(threads),
                                        verbose = verbose,
                                        ofile = outputfile,
                                        oprefix = oprefix,

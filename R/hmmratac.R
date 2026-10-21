@@ -9,6 +9,8 @@
 #'     directory. Default: the current working directory
 #' @param name Name for this experiment, which will be used as a
 #'     prefix to generate output file names. DEFAULT: "NA"
+#' @param threads Number of CPU threads MACS3 can use, including the
+#'     main process. Use 1 for serial execution. Default: 1
 #' @param verbose Set verbose level of runtime message. 0: only show
 #'     critical message, 1: show additional warning message, 2: show
 #'     process information, 3: show debug messages. DEFAULT:2
@@ -20,6 +22,7 @@
 #' @param em_skip Do not perform EM training on the fragment distribution. If set, EM_MEANS and EM.STDDEVS will be used instead. Default: False
 #' @param em_means Comma separated list of initial mean values for the fragment distribution for short fragments, mono-, di-, and tri-nucleosomal fragments. Default: 50 200 400 600
 #' @param em_stddevs Comma separated list of initial standard deviation values for fragment distribution for short fragments, mono-, di-, and tri-nucleosomal fragments. Default: 20 20 20 20
+#' @param em_jump The factor to amplify the difference between the observed and expected mean and variance values of the four distributions, then decide the expected mean and variance in the next EM step. Larger jump will lead to faster convergence but may be less stable. Default: 0.5
 #' @param min_frag_p We will exclude the abnormal fragments that can't be assigned to any of the four signal tracks. After we use EM to find the means and stddevs of the four distributions, we will calculate the likelihood that a given fragment length fit any of the four using normal distribution. The criteria we will use is that if a fragment length has less than MIN_FRAG_P probability to be like either of short, mono, di, or tri-nuc fragment, we will exclude it while generating the four signal tracks for later HMM training and prediction. The value should be between 0 and 1. Larger the value, more abnormal fragments will be allowed. So if you want to include more 'ideal' fragments, make this value smaller. Default = 0.001
 #' @param hmm_binsize Size of the bins to split the pileup signals for training and decoding with Hidden Markov Model. Must >= 1. Smaller the binsize, higher the resolution of the results, slower the process. Default = 10
 #' @param hmm_lower Lower limit on fold change range for choosing training sites. This is an important parameter for training so please read. The purpose of this parameter is to ONLY INCLUDE those chromatin regions having ordinary enrichment so we can get training samples to learn the common features through HMM. It's highly recommended to run the `--cutoff-analysis-only` first to decide the lower cutoff `-l`, the upper cutoff `-u`, and the pre-scanning cutoff `-c`. The lower cutoff should be the cutoff in the cutoff analysis result that can capture moderate number ( about 10k ) of peaks with normal width ( average length 500-1000bps long). Default: 10
@@ -52,8 +55,13 @@
 #'     we assume that open region should have a lot of short
 #'     fragments, it may be possible that the overall short fragments
 #'     are too few to be useful. Default: False
-#' @param keepduplicates Keep duplicate reads from analysis. By
-#'     default, duplicate reads will be removed. Default: False
+#' @param remove_dup Remove duplicated fragments from analysis. A
+#'     fragment is duplicated if both ends of the fragment are the
+#'     same as another fragment. By default, duplicated fragments
+#'     won't be excluded. Default: False
+#' @param keepduplicates Deprecated. Use `remove_dup` instead. In
+#'     MACS3 3.0.2, setting it to TRUE removed duplicated
+#'     fragments, so TRUE is now treated as `remove_dup = TRUE`.
 #' @param blacklist Filename of blacklisted regions to exclude
 #'     (previously was BED_file). Examples are those from
 #'     ENCODE. Default: NA
@@ -74,7 +82,7 @@
 #'     a time. The HMM model will be applied with Viterbi to find the
 #'     optimal state path in each region. bigger the number,
 #'     'possibly' faster the decoding process, 'definitely' larger the
-#'     memory usage. Default: 1000.
+#'     memory usage. Default: 5000.
 #' @param buffer_size Buffer size for incrementally increasing
 #'     internal array size to store reads alignment information. In
 #'     most cases, you don't have to change this parameter. However,
@@ -86,7 +94,7 @@
 #'     BUFFER_SIZE * 8 Bytes. DEFAULT: 100000
 #' @param ... More options for macs3.
 #' @export
-hmmratac <- function(input_file, outdir = ".", name = "NA", verbose = 2L, log = TRUE,
+hmmratac <- function(input_file, outdir = ".", name = "NA", threads = 1L, verbose = 2L, log = TRUE,
                      cutoff_analysis_only = FALSE,
                      cutoff_analysis_max = 100,
                      cutoff_analysis_steps = 100,
@@ -94,6 +102,7 @@ hmmratac <- function(input_file, outdir = ".", name = "NA", verbose = 2L, log = 
                      em_skip = FALSE,
                      em_means = list(50, 200, 400, 600),
                      em_stddevs = list(20, 20, 20, 20),
+                     em_jump = 0.5,
                      min_frag_p = 0.001,
                      hmm_binsize = 10L,
                      hmm_lower = 10L,
@@ -108,17 +117,22 @@ hmmratac <- function(input_file, outdir = ".", name = "NA", verbose = 2L, log = 
                      prescan_cutoff = 1.2,
                      openregion_minlen = 100,
                      pileup_short = FALSE,
+                     remove_dup = FALSE,
                      keepduplicates = FALSE,
                      blacklist = NULL,
                      save_digested = FALSE,
                      save_likelihoods = FALSE,
                      save_states = FALSE,
                      save_train = FALSE,
-                     decoding_steps = 1000,
+                     decoding_steps = 5000,
                      buffer_size = 100000,
                      ...){
     if(is.character(input_file)){
         input_file <- as.list(normalizePath(input_file))
+    }
+    if(isTRUE(keepduplicates)){
+        warning("'keepduplicates' is deprecated; use 'remove_dup = TRUE' instead.")
+        remove_dup <- TRUE
     }
     dir.create(outdir, recursive = TRUE, showWarnings = FALSE)
     cl <- basiliskStart(env_macs)
@@ -135,6 +149,7 @@ hmmratac <- function(input_file, outdir = ".", name = "NA", verbose = 2L, log = 
                                        em_skip = em_skip,
                                        em_means = em_means,
                                        em_stddevs = em_stddevs,
+                                       em_jump = em_jump,
                                        min_frag_p = min_frag_p,
                                        hmm_binsize = hmm_binsize,
                                        hmm_lower = hmm_lower,
@@ -149,7 +164,7 @@ hmmratac <- function(input_file, outdir = ".", name = "NA", verbose = 2L, log = 
                                        prescan_cutoff = prescan_cutoff,
                                        openregion_minlen = openregion_minlen,
                                        pileup_short = pileup_short,
-                                       misc_keep_duplicates = keepduplicates,
+                                       misc_remove_duplicates = remove_dup,
                                        blacklist = blacklist,
                                        save_likelihoods = save_likelihoods,
                                        save_digested = save_digested,
@@ -157,6 +172,7 @@ hmmratac <- function(input_file, outdir = ".", name = "NA", verbose = 2L, log = 
                                        save_train = save_train,
                                        decoding_steps = decoding_steps,
                                        buffer_size = buffer_size,
+                                       threads = as.integer(threads),
                                        verbose = verbose,
                                        ratio = NA)
 

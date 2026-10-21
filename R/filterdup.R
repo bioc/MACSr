@@ -10,6 +10,8 @@
 #' @param keepduplicates It controls the 'macs3 filterdup' behavior towards duplicate tags/pairs at the exact same location -- the same coordination and the same strand. The 'auto' option makes '%(prog)s' calculate the maximum tags at the exact same location based on binomal distribution using given -p as pvalue cutoff; and the 'all' option keeps every tags (useful if you only want to convert formats). If an integer is given, at most this number of tags will be kept at the same location. Note, MACS3 callpeak function uses KEEPDUPLICATES=1 as default. Note, if you've used samtools or picard to flag reads as 'PCR/Optical duplicate' in bit 1024, MACS3 will still read them although the reads may be decided by MACS3 as duplicate later. Default: auto
 #' @param outputfile Output BED file name. If not specified, will write to standard output. Note, if the input format is BAMPE or BEDPE, the output will be in BEDPE format. DEFAULT: stdout
 #' @param outdir The output directory.
+#' @param threads Number of CPU threads MACS3 can use, including the
+#'     main process. Use 1 for serial execution. Default: 1
 #' @param verbose Set verbose level of runtime message. 0: only show
 #'     critical message, 1: show additional warning message, 2: show
 #'     process information, 3: show debug messages.  DEFAULT: 2.
@@ -37,7 +39,7 @@
 #' res <- filterdup(ifile = CHIP, outputfile = "test.bed", outdir = tempdir())
 filterdup <- function(ifile, gsize = "hs", format = "AUTO",
                       tsize = NULL, pvalue = 1e-5, keepduplicates = "auto",
-                      outputfile = character(), outdir = ".", verbose = 2L,
+                      outputfile = character(), outdir = ".", threads = 1L, verbose = 2L,
                       buffer_size = 10000, dryrun = FALSE, log = TRUE){
     if(is.character(ifile)){
         ifile <- as.list(normalizePath(ifile))
@@ -51,6 +53,7 @@ filterdup <- function(ifile, gsize = "hs", format = "AUTO",
                                        pvalue = pvalue,
                                        format = format,
                                        keepduplicates = keepduplicates,
+                                       threads = as.integer(threads),
                                        verbose = verbose,
                                        outputfile = outputfile,
                                        outdir = outdir,

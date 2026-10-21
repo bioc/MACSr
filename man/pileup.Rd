@@ -13,6 +13,7 @@ pileup(
   bothdirection = FALSE,
   extsize = 200L,
   buffer_size = 100000L,
+  threads = 1L,
   verbose = 2L,
   log = TRUE
 )
@@ -51,6 +52,9 @@ size in order to decrease memory usage (but it will take longer
 time to read alignment files). Minimum memory requested for
 reading an alignment file is about # of CHROMOSOME *
 BUFFER_SIZE * 8 Bytes. DEFAULT: 100000}
+
+\item{threads}{Number of CPU threads MACS3 can use, including the
+main process. Use 1 for serial execution. Default: 1}
 
 \item{verbose}{Set verbose level. 0: only show critical message, 1:
 show additional warning message, 2: show process information,

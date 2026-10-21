@@ -18,7 +18,8 @@ callvar(
   top2allelesMinRatio = 0.8,
   altalleleMinCount = 2L,
   maxAR = 0.95,
-  np = 1L,
+  np = NULL,
+  threads = 1L,
   verbose = 2L,
   log = TRUE
 )
@@ -74,11 +75,10 @@ likelihood for allele-specific binding. If we allow higher
 maxAR, we may mistakenly assign some homozygous loci as
 heterozygous. Default:0.95}
 
-\item{np}{CPU used for mutliple processing. Please note that,
-assigning more CPUs does not guarantee the process being
-faster. Creating too many parrallel processes need memory
-operations and may negate benefit from multi
-processing. Default: 1}
+\item{np}{Deprecated. Use \code{threads} instead.}
+
+\item{threads}{Number of CPU threads MACS3 can use, including the
+main process. Use 1 for serial execution. Default: 1}
 
 \item{verbose}{Set verbose level of runtime message. 0: only show
 critical message, 1: show additional warning message, 2: show

@@ -1,3 +1,13 @@
+Changes in version 1.21.4 (2026-10-21)
++ Upgrade to MACS 3.1.0, which requires Python 3.12.
++ hmmratac: add remove_dup and em_jump; deprecate keepduplicates.
++ hmmratac: decoding_steps now defaults to 5000, as in MACS 3.1.0.
++ Add threads argument (default 1) to callpeak, predictd, pileup,
+  filterdup, randsample, refinepeak, hmmratac and callvar.
++ callvar: deprecate np; use threads instead.
++ pileup: fix the default format = "AUTO", which MACS3 pileup rejected.
++ Add CITATION for the MACS3 paper.
+
 Changes in version 1.21.3 (2026-10-07)
 + Use bundled test data in examples and tests instead of ExperimentHub.
 

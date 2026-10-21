@@ -1,0 +1,17 @@
+bibentry(
+    bibtype = "Article",
+    title = "MACS3: A Peak-calling Platform for Bulk and Single-cell Regulatory Genomics",
+    author = c(
+        person("Philippa", "Doherty"),
+        person("Qiang", "Hu"),
+        person("Zihan", "Zhuang"),
+        person("Hong", "Zhang"),
+        person(c("Sai", "Charan"), "Penikalapati"),
+        person("Song", "Liu"),
+        person("Tao", "Liu")
+    ),
+    journal = "Genomics, Proteomics \\& Bioinformatics",
+    year = "2026",
+    pages = "qzag097",
+    doi = "10.1093/gpbjnl/qzag097"
+)

@@ -41,6 +41,8 @@
 #' @param fecutoff When set, the value will be used as the minimum requirement to filter out peaks with low fold-enrichment. Note, MACS3 adds one as pseudocount while calculating fold-enrichment. By default, it is set as 1 so there is no filtering. DEFAULT: 1.0
 #' @param call_summits If set, MACS will use a more sophisticated signal processing approach to find subpeak summits in each enriched peak region. DEFAULT: False
 #' @param buffer_size Buffer size for incrementally increasing internal array size to store reads alignment information. In most cases, you don't have to change this parameter. However, if there are large number of chromosomes/contigs/scaffolds in your alignment, it's recommended to specify a smaller buffer size in order to decrease memory usage (but it will take longer time to read alignment files). Minimum memory requested for reading an alignment file is about # of CHROMOSOME * BUFFER_SIZE * 8 Bytes. DEFAULT: 100000
+#' @param threads Number of CPU threads MACS3 can use, including the
+#'     main process. Use 1 for serial execution. Default: 1
 #' @param verbose Set verbose level of runtime message. 0: only show
 #'     critical message, 1: show additional warning message, 2: show
 #'     process information, 3: show debug messages. DEFAULT:2
@@ -66,7 +68,7 @@ callpeak <- function(tfile, cfile = NULL, gsize = "hs", tsize = NULL, format = "
                      slocal = 1000, llocal = 10000, broad = FALSE, broadcutoff = 0.1,
                      maxgap = NULL, minlen = NULL, seed = -1,
                      cutoff_analysis = FALSE, fecutoff = 0.1, call_summits = FALSE,
-                     buffer_size = 100000, verbose = 2L, log = TRUE, ...){
+                     buffer_size = 100000, threads = 1L, verbose = 2L, log = TRUE, ...){
     if(is.character(tfile)){
         tfile <- as.list(normalizePath(tfile))
     }
@@ -112,6 +114,7 @@ callpeak <- function(tfile, cfile = NULL, gsize = "hs", tsize = NULL, format = "
                                        fecutoff = fecutoff,
                                        call_summits = call_summits,
                                        buffer_size = buffer_size,
+                                       threads = as.integer(threads),
                                        verbose = verbose,
                                        ratio = NA)
 

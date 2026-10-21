@@ -143,6 +143,13 @@ context("2. test pileup")
             extsize = 200,
             outputfile = "pileup_output.bed.bdg"))
     })
+    test_that("pileup detects the format when format is not given", {
+        expect_no_error(pu2 <- pileup(ifile = CHIP,
+            extsize = 200,
+            outputfile = "pileup_output_auto.bed.bdg"))
+        expect_identical(readLines(pu2$outputs),
+                         readLines("pileup_output.bed.bdg"))
+    })
 
 
 context("3. test filterdup")

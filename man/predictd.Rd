@@ -14,6 +14,7 @@ predictd(
   d_min = 20,
   mfold = c(5, 50),
   buffer_size = 1e+05,
+  threads = 1L,
   verbose = 2L,
   log = TRUE
 )
@@ -46,6 +47,9 @@ limit, and higher than the lower limit. Use as
 \item{buffer_size}{Buffer size for incrementally increasing
 internal array size to store reads alignment
 information. DEFAULT: 100000.}
+
+\item{threads}{Number of CPU threads MACS3 can use, including the
+main process. Use 1 for serial execution. Default: 1}
 
 \item{verbose}{Set verbose level of runtime message. 0: only show
 critical message, 1: show additional warning message, 2: show

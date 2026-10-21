@@ -23,6 +23,8 @@
 #' @param buffer_size Buffer size for incrementally increasing
 #'     internal array size to store reads alignment
 #'     information. DEFAULT: 100000.
+#' @param threads Number of CPU threads MACS3 can use, including the
+#'     main process. Use 1 for serial execution. Default: 1
 #' @param verbose Set verbose level of runtime message. 0: only show
 #'     critical message, 1: show additional warning message, 2: show
 #'     process information, 3: show debug messages. DEFAULT:2
@@ -36,7 +38,7 @@
 predictd <- function(ifile, gsize = "hs", format = "AUTO",
                      plot = normalizePath(tempdir(), "predictd_mode.pdf"),
                      tsize = NULL, bw = 300, d_min = 20, mfold = c(5, 50),
-                     buffer_size = 100000, verbose = 2L, log = TRUE){
+                     buffer_size = 100000, threads = 1L, verbose = 2L, log = TRUE){
     if(is.character(ifile)){
         ifile <- as.list(normalizePath(ifile))
     }
@@ -53,6 +55,7 @@ predictd <- function(ifile, gsize = "hs", format = "AUTO",
                                        mfold = mfold,
                                        outdir = dirname(rfile),
                                        rfile = basename(rfile),
+                                       threads = as.integer(threads),
                                        verbose = verbose,
                                        buffer_size = buffer_size)
         .predictd <- reticulate::import("MACS3.Commands.predictd_cmd")

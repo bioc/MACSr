@@ -13,6 +13,7 @@ filterdup(
   keepduplicates = "auto",
   outputfile = character(),
   outdir = ".",
+  threads = 1L,
   verbose = 2L,
   buffer_size = 10000,
   dryrun = FALSE,
@@ -37,6 +38,9 @@ test. DEFAULT:1e-5.}
 \item{outputfile}{Output BED file name. If not specified, will write to standard output. Note, if the input format is BAMPE or BEDPE, the output will be in BEDPE format. DEFAULT: stdout}
 
 \item{outdir}{The output directory.}
+
+\item{threads}{Number of CPU threads MACS3 can use, including the
+main process. Use 1 for serial execution. Default: 1}
 
 \item{verbose}{Set verbose level of runtime message. 0: only show
 critical message, 1: show additional warning message, 2: show

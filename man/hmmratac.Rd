@@ -8,6 +8,7 @@ hmmratac(
   input_file,
   outdir = ".",
   name = "NA",
+  threads = 1L,
   verbose = 2L,
   log = TRUE,
   cutoff_analysis_only = FALSE,
@@ -17,6 +18,7 @@ hmmratac(
   em_skip = FALSE,
   em_means = list(50, 200, 400, 600),
   em_stddevs = list(20, 20, 20, 20),
+  em_jump = 0.5,
   min_frag_p = 0.001,
   hmm_binsize = 10L,
   hmm_lower = 10L,
@@ -31,13 +33,14 @@ hmmratac(
   prescan_cutoff = 1.2,
   openregion_minlen = 100,
   pileup_short = FALSE,
+  remove_dup = FALSE,
   keepduplicates = FALSE,
   blacklist = NULL,
   save_digested = FALSE,
   save_likelihoods = FALSE,
   save_states = FALSE,
   save_train = FALSE,
-  decoding_steps = 1000,
+  decoding_steps = 5000,
   buffer_size = 1e+05,
   ...
 )
@@ -50,6 +53,9 @@ directory. Default: the current working directory}
 
 \item{name}{Name for this experiment, which will be used as a
 prefix to generate output file names. DEFAULT: "NA"}
+
+\item{threads}{Number of CPU threads MACS3 can use, including the
+main process. Use 1 for serial execution. Default: 1}
 
 \item{verbose}{Set verbose level of runtime message. 0: only show
 critical message, 1: show additional warning message, 2: show
@@ -70,6 +76,8 @@ process information, 3: show debug messages. DEFAULT:2}
 \item{em_means}{Comma separated list of initial mean values for the fragment distribution for short fragments, mono-, di-, and tri-nucleosomal fragments. Default: 50 200 400 600}
 
 \item{em_stddevs}{Comma separated list of initial standard deviation values for fragment distribution for short fragments, mono-, di-, and tri-nucleosomal fragments. Default: 20 20 20 20}
+
+\item{em_jump}{The factor to amplify the difference between the observed and expected mean and variance values of the four distributions, then decide the expected mean and variance in the next EM step. Larger jump will lead to faster convergence but may be less stable. Default: 0.5}
 
 \item{min_frag_p}{We will exclude the abnormal fragments that can't be assigned to any of the four signal tracks. After we use EM to find the means and stddevs of the four distributions, we will calculate the likelihood that a given fragment length fit any of the four using normal distribution. The criteria we will use is that if a fragment length has less than MIN_FRAG_P probability to be like either of short, mono, di, or tri-nuc fragment, we will exclude it while generating the four signal tracks for later HMM training and prediction. The value should be between 0 and 1. Larger the value, more abnormal fragments will be allowed. So if you want to include more 'ideal' fragments, make this value smaller. Default = 0.001}
 
@@ -117,8 +125,14 @@ we assume that open region should have a lot of short
 fragments, it may be possible that the overall short fragments
 are too few to be useful. Default: False}
 
-\item{keepduplicates}{Keep duplicate reads from analysis. By
-default, duplicate reads will be removed. Default: False}
+\item{remove_dup}{Remove duplicated fragments from analysis. A
+fragment is duplicated if both ends of the fragment are the
+same as another fragment. By default, duplicated fragments
+won't be excluded. Default: False}
+
+\item{keepduplicates}{Deprecated. Use \code{remove_dup} instead. In
+MACS3 3.0.2, setting it to TRUE removed duplicated
+fragments, so TRUE is now treated as \code{remove_dup = TRUE}.}
 
 \item{blacklist}{Filename of blacklisted regions to exclude
 (previously was BED_file). Examples are those from
@@ -145,7 +159,7 @@ False}
 a time. The HMM model will be applied with Viterbi to find the
 optimal state path in each region. bigger the number,
 'possibly' faster the decoding process, 'definitely' larger the
-memory usage. Default: 1000.}
+memory usage. Default: 5000.}
 
 \item{buffer_size}{Buffer size for incrementally increasing
 internal array size to store reads alignment information. In

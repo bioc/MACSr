@@ -30,6 +30,8 @@
 #'     time to read alignment files). Minimum memory requested for
 #'     reading an alignment file is about # of CHROMOSOME *
 #'     BUFFER_SIZE * 8 Bytes. DEFAULT: 100000
+#' @param threads Number of CPU threads MACS3 can use, including the
+#'     main process. Use 1 for serial execution. Default: 1
 #' @param verbose Set verbose level. 0: only show critical message, 1:
 #'     show additional warning message, 2: show process information,
 #'     3: show debug messages. If you want to know where are the
@@ -47,7 +49,7 @@ pileup <- function(ifile, outputfile = character(), outdir = ".",
                    format = c("AUTO","BAM","SAM","BED","ELAND","ELANDMULTI",
                        "ELANDEXPORT","BOWTIE","BAMPE","BEDPE"),
                    bothdirection = FALSE, extsize = 200L,
-                   buffer_size = 100000L, verbose = 2L,
+                   buffer_size = 100000L, threads = 1L, verbose = 2L,
                    log = TRUE){
     format <- match.arg(format)
     if(is.character(ifile)){
@@ -57,11 +59,24 @@ pileup <- function(ifile, outputfile = character(), outdir = ".",
     cl <- basiliskStart(env_macs)
     on.exit(basiliskStop(cl))
     res <- basiliskRun(cl, function(.namespace, outdir){
+        if(format == "AUTO"){
+            ## MACS3 pileup does not accept AUTO, so detect the format here.
+            formats <- c(BAMParser = "BAM", BEDParser = "BED",
+                         ELANDResultParser = "ELAND",
+                         ELANDMultiParser = "ELANDMULTI",
+                         ELANDExportParser = "ELANDEXPORT",
+                         SAMParser = "SAM", BowtieParser = "BOWTIE")
+            .parser <- reticulate::import("MACS3.IO.Parser")
+            p <- .parser$guess_parser(ifile[[1]], threads = 1L)
+            format <- formats[[p$`__class__`$`__name__`]]
+            p$close()
+        }
         opts <- .namespace()$Namespace(ifile = ifile,
                                        format = format,
                                        bothdirection = bothdirection,
                                        extsize = extsize,
                                        buffer_size = buffer_size,
+                                       threads = as.integer(threads),
                                        verbose = verbose,
                                        outputfile = outputfile,
                                        outdir = outdir)

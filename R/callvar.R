@@ -38,11 +38,9 @@
 #'     likelihood for allele-specific binding. If we allow higher
 #'     maxAR, we may mistakenly assign some homozygous loci as
 #'     heterozygous. Default:0.95
-#' @param np CPU used for mutliple processing. Please note that,
-#'     assigning more CPUs does not guarantee the process being
-#'     faster. Creating too many parrallel processes need memory
-#'     operations and may negate benefit from multi
-#'     processing. Default: 1
+#' @param np Deprecated. Use `threads` instead.
+#' @param threads Number of CPU threads MACS3 can use, including the
+#'     main process. Use 1 for serial execution. Default: 1
 #' @param verbose Set verbose level of runtime message. 0: only show
 #'     critical message, 1: show additional warning message, 2: show
 #'     process information, 3: show debug messages. DEFAULT:2
@@ -69,9 +67,14 @@ callvar <- function(peakbed, tfile, cfile,
                     top2allelesMinRatio = 0.8,
                     altalleleMinCount = 2L,
                     maxAR = 0.95,
-                    np = 1L,
+                    np = NULL,
+                    threads = 1L,
                     verbose = 2L,
                     log = TRUE){
+    if(!is.null(np)){
+        warning("'np' is deprecated; use 'threads' instead.")
+        threads <- np
+    }
     peakbed <- normalizePath(peakbed)
     tfile <- normalizePath(tfile)
     cfile <- normalizePath(cfile)
@@ -90,7 +93,7 @@ callvar <- function(peakbed, tfile, cfile,
                                        top2allelesMinRatio = top2allelesMinRatio,
                                        altalleleMinCount = altalleleMinCount,
                                        maxAR = maxAR,
-                                       np = np,
+                                       threads = as.integer(threads),
                                        verbose = verbose,
                                        ofile = outputfile)
         .callvar <- reticulate::import("MACS3.Commands.callvar_cmd")

@@ -40,6 +40,7 @@ callpeak(
   fecutoff = 0.1,
   call_summits = FALSE,
   buffer_size = 1e+05,
+  threads = 1L,
   verbose = 2L,
   log = TRUE,
   ...
@@ -120,6 +121,9 @@ available unless --broad is set.}
 \item{call_summits}{If set, MACS will use a more sophisticated signal processing approach to find subpeak summits in each enriched peak region. DEFAULT: False}
 
 \item{buffer_size}{Buffer size for incrementally increasing internal array size to store reads alignment information. In most cases, you don't have to change this parameter. However, if there are large number of chromosomes/contigs/scaffolds in your alignment, it's recommended to specify a smaller buffer size in order to decrease memory usage (but it will take longer time to read alignment files). Minimum memory requested for reading an alignment file is about # of CHROMOSOME * BUFFER_SIZE * 8 Bytes. DEFAULT: 100000}
+
+\item{threads}{Number of CPU threads MACS3 can use, including the
+main process. Use 1 for serial execution. Default: 1}
 
 \item{verbose}{Set verbose level of runtime message. 0: only show
 critical message, 1: show additional warning message, 2: show
